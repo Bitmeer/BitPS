@@ -26,7 +26,7 @@ def send_telegram_notification(message, request_id=None, base_url="https://bitps
     url = f"https://api.telegram.org/bot{token}/sendMessage"
     payload = {'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}
     if request_id:
-        full_link = f"{base_url}/requests/{request_id}/"
+        full_link = f"{base_url}/request/{request_id}/"
         payload['reply_markup'] = {'inline_keyboard': [[{'text': f"Открыть заявку #{request_id}", 'url': full_link}]]}
     try:
         requests.post(url, json=payload, timeout=5)
