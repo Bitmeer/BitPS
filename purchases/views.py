@@ -18,7 +18,7 @@ from .forms import PurchaseRequestForm, CustomUserCreationForm
 
 
 # Вспомогательная функция для отправки уведомлений в Telegram
-def send_telegram_notification(message, request_id=None):
+def send_telegram_notification(msg, request_id=self.object.id, base_url="https://bitps.onrender.com"):
     token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
     chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
     if not token or not chat_id:
