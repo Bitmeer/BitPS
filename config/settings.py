@@ -25,7 +25,11 @@ SECRET_KEY = 'django-insecure-z-=mhl91!x-xu(@@tco06-fp(l=8hqzz2ht+^2%yw9-)l^it9o
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = True
 
-ALLOWED_HOSTS = []
+ALLOWED_HOSTS = ['127.0.0.1', 'localhost', 'bitps.onrender.com']
+# Добавляем возможность настройки через переменные окружения
+allowed_host = os.environ.get('ALLOWED_HOSTS')
+if allowed_host:
+    ALLOWED_HOSTS.append(allowed_host)
 
 
 # Application definition
