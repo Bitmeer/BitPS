@@ -1,0 +1,54 @@
+{% extends "base.html" %}
+
+{% block title %}Регистрация - Система закупок{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center align-items-center" style="min-height: 70vh;">
+    <div class="col-md-6 col-lg-5">
+        <div class="card shadow-lg border-0" style="border-radius: 16px;">
+            <div class="card-body p-5">
+                <div class="text-center mb-4">
+                    <div class="bg-primary bg-opacity-10 rounded-circle d-inline-flex p-3 mb-3">
+                        <i class="fas fa-user-plus fa-2x text-primary"></i>
+                    </div>
+                    <h3 class="fw-bold">Регистрация</h3>
+                    <p class="text-muted">Создайте аккаунт для работы в системе</p>
+                </div>
+
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold" style="font-size: 0.9rem;">
+                                {{ field.label }}
+                                {% if field.field.required %}<span class="text-danger">*</span>{% endif %}
+                            </label>
+                            
+                            {{ field }}
+                            
+                            {% if field.help_text %}
+                                <div class="form-text small text-muted mt-1">{{ field.help_text|safe }}</div>
+                            {% endif %}
+                            
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1"><i class="fas fa-exclamation-circle me-1"></i>{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-grid mt-4 pt-2">
+                        <button type="submit" class="btn btn-primary btn-lg" style="border-radius: 8px;">
+                            Зарегистрироваться
+                        </button>
+                    </div>
+                </form>
+                
+                <div class="text-center mt-4 pt-2 border-top">
+                    <p class="mb-0 text-muted">Уже есть аккаунт? <a href="{% url 'login' %}" class="text-decoration-none fw-bold">Войти</a></p>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,194 @@
+/* ===========================
+   Custom Animations & Effects
+   =========================== */
+
+@keyframes fadeIn {
+    from {
+        opacity: 0;
+        transform: translateY(10px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+@keyframes slideInLeft {
+    from {
+        opacity: 0;
+        transform: translateX(-20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateX(0);
+    }
+}
+
+@keyframes pulse {
+    0%, 100% {
+        opacity: 1;
+    }
+    50% {
+        opacity: 0.5;
+    }
+}
+
+/* ===========================
+   Component-specific Styles
+   =========================== */
+
+/* Form Elements Enhancement */
+.form-control, .form-select {
+    background-color: #fafbfc;
+    transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+}
+
+.form-control:focus, .form-select:focus {
+    background-color: #ffffff;
+    transform: scale(1.01);
+}
+
+/* Textarea */
+textarea.form-control {
+    resize: vertical;
+    min-height: 120px;
+}
+
+/* Button Animations */
+.btn {
+    position: relative;
+    overflow: hidden;
+}
+
+.btn::after {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.5);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+.btn:active::after {
+    width: 300px;
+    height: 300px;
+}
+
+/* Table Enhancements */
+.table tbody tr {
+    animation: fadeIn 0.3s ease-in;
+}
+
+.table tbody tr:hover {
+    transition: all 0.2s ease;
+}
+
+.table thead {
+    position: sticky;
+    top: 0;
+}
+
+/* Badge Enhancements */
+.badge {
+    text-transform: uppercase;
+    letter-spacing: 0.5px;
+    font-size: 0.75rem;
+}
+
+/* Card Animations */
+.card {
+    animation: fadeIn 0.5s ease-in;
+}
+
+/* Navigation */
+.navbar {
+    animation: slideInLeft 0.3s ease-out;
+}
+
+/* Loading State */
+.loading {
+    animation: pulse 1.5s infinite;
+}
+
+/* ===========================
+   Status-specific Colors
+   =========================== */
+
+.status-pending {
+    background-color: #fff3cd;
+    color: #856404;
+}
+
+.status-approved {
+    background-color: #d4edda;
+    color: #155724;
+}
+
+.status-rejected {
+    background-color: #f8d7da;
+    color: #721c24;
+}
+
+/* ===========================
+   Utility Classes
+   =========================== */
+
+.shadow-sm-hover {
+    transition: box-shadow 0.3s ease;
+}
+
+.shadow-sm-hover:hover {
+    box-shadow: 0 8px 24px rgba(0, 0, 0, 0.12) !important;
+}
+
+.gradient-text {
+    background: linear-gradient(135deg, #0066ff 0%, #0052cc 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    background-clip: text;
+}
+
+/* ===========================
+   Responsive Adjustments
+   =========================== */
+
+@media (max-width: 768px) {
+    .header-section h2 {
+        font-size: 1.5rem;
+    }
+    
+    .table {
+        font-size: 0.9rem;
+    }
+    
+    .btn {
+        padding: 0.5rem 1rem;
+    }
+    
+    .card-body {
+        padding: 1rem !important;
+    }
+}
+
+/* ===========================
+   Print Styles
+   =========================== */
+
+@media print {
+    .navbar, footer, .btn-primary, .btn-success {
+        display: none;
+    }
+    
+    .card {
+        box-shadow: none;
+        border: 1px solid #ddd;
+    }
+    
+    body {
+        background: white;
+    }
+}

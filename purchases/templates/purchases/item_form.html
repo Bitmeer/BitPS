@@ -1,0 +1,44 @@
+{% extends "base.html" %}
+
+{% block title %}Добавить товар{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-md-8 col-lg-6">
+        <div class="card shadow-sm mt-4">
+            <div class="card-header bg-white py-3">
+                <h4 class="mb-0 text-center">
+                    <i class="fas fa-box-open me-2 text-primary"></i>Новая позиция каталога
+                </h4>
+            </div>
+            <div class="card-body p-4">
+                <form method="post">
+                    {% csrf_token %}
+                    
+                    {% for field in form %}
+                        <div class="mb-3">
+                            <label class="form-label fw-bold">{{ field.label }}</label>
+                            <input type="{{ field.field.widget.input_type|default:'text' }}" 
+                                   name="{{ field.name }}" 
+                                   class="form-control" 
+                                   {% if field.field.required %}required{% endif %}
+                                   {% if field.value %}value="{{ field.value }}"{% endif %}>
+                            {% if field.help_text %}
+                                <div class="form-text">{{ field.help_text }}</div>
+                            {% endif %}
+                            {% for error in field.errors %}
+                                <div class="text-danger small mt-1">{{ error }}</div>
+                            {% endfor %}
+                        </div>
+                    {% endfor %}
+
+                    <div class="d-grid gap-2 mt-4">
+                        <button type="submit" class="btn btn-success btn-lg">Сохранить в справочник</button>
+                        <a href="{% url 'catalog' %}" class="btn btn-outline-secondary">Отмена</a>
+                    </div>
+                </form>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

@@ -1,0 +1,67 @@
+{% extends "base.html" %}
+
+{% block title %}Справочник номенклатуры{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h2 class="mb-0" style="font-weight: 700; font-size: 2rem;">
+            <i class="fas fa-book-open me-2" style="color: var(--primary);"></i>
+            Каталог товаров
+        </h2>
+        <p class="text-muted mt-2 mb-0">Справочник доступной для заказа номенклатуры</p>
+    </div>
+    <a href="{% url 'item_create' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-2"></i>
+        Добавить позицию
+    </a>
+</div>
+
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card">
+    <div class="card-body p-0">
+        <div class="table-responsive">
+            <table class="table align-middle">
+                <thead>
+                    <tr>
+                        <th>Категория</th>
+                        <th>Артикул (SKU)</th>
+                        <th>Наименование</th>
+                        <th>Ориентировочная цена</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in items %}
+                    <tr>
+                        <td><span class="badge bg-secondary">{{ item.category }}</span></td>
+                        <td><code class="text-dark">{{ item.sku }}</code></td>
+                        <td><strong>{{ item.name }}</strong></td>
+                        <td>
+                            {% if item.estimated_price %}
+                                {{ item.estimated_price }} ₽
+                            {% else %}
+                                <span class="text-muted small">Не указана</span>
+                            {% endif %}
+                        </td>
+                    </tr>
+                    {% empty %}
+                    <tr>
+                        <td colspan="4" class="text-center py-4 text-muted">Справочник пуст</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+{% endblock %}

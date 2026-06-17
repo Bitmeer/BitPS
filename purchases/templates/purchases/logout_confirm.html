@@ -1,0 +1,31 @@
+{% extends "base.html" %}
+
+{% block title %}Выход - Система закупок{% endblock %}
+
+{% block content %}
+<div class="row justify-content-center">
+    <div class="col-lg-6">
+        <div class="card mt-5">
+            <div class="card-body p-5 text-center">
+                <i class="fas fa-sign-out-alt" style="font-size: 3rem; color: var(--primary); margin-bottom: 1rem;"></i>
+                <h3 class="mb-3">Вы уверены?</h3>
+                <p class="text-muted mb-4">Вы собираетесь выйти из системы. Вам нужно будет снова войти, чтобы продолжить работу.</p>
+                
+                <div class="d-grid gap-2">
+                    <form method="post" class="mb-0">
+                        {% csrf_token %}
+                        <button type="submit" class="btn btn-danger btn-lg">
+                            <i class="fas fa-sign-out-alt me-2"></i>
+                            Выйти из системы
+                        </button>
+                    </form>
+                    <a href="{% url 'request_list' %}" class="btn btn-outline-secondary btn-lg">
+                        <i class="fas fa-arrow-left me-2"></i>
+                        Отмена
+                    </a>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+{% endblock %}

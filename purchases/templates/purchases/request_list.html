@@ -1,0 +1,294 @@
+{% extends "base.html" %}
+
+{% block title %}Мои закупки - Система закупок{% endblock %}
+
+{% block content %}
+<div class="d-flex justify-content-between align-items-center mb-4 flex-wrap gap-3">
+    <div>
+        <h2 class="mb-0" style="font-weight: 700; font-size: 2rem;">
+            <i class="fas fa-boxes me-2" style="color: var(--primary);"></i>
+            Мои закупки
+        </h2>
+        <p class="text-muted mt-2 mb-0">Список всех ваших заявок на закупку</p>
+    </div>
+    <a href="{% url 'request_create' %}" class="btn btn-primary btn-lg">
+        <i class="fas fa-plus me-2"></i>
+        Новая заявка
+    </a>
+</div>
+
+{% if messages %}
+    <div class="mb-4">
+        {% for message in messages %}
+            <div class="alert alert-{{ message.tags }} alert-dismissible fade show" role="alert">
+                {{ message }}
+                <button type="button" class="btn-close" data-bs-dismiss="alert" aria-label="Close"></button>
+            </div>
+        {% endfor %}
+    </div>
+{% endif %}
+
+<div class="card mb-4" style="background: linear-gradient(135deg, var(--primary-light) 0%, #f0f6ff 100%);">
+    <div class="card-body">
+        <div class="row align-items-center">
+            <div class="col-auto">
+                <i class="fas fa-user-circle" style="font-size: 2.5rem; color: var(--primary);"></i>
+            </div>
+            <div class="col">
+                <h6 class="mb-1" style="color: #666; font-weight: 500;">Текущий пользователь</h6>
+                <h5 class="mb-0" style="color: #1a1a2e; font-weight: 700;">{{ user.get_full_name }}</h5>
+                <small class="text-muted">{{ user.get_role_display }}</small>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% if requests or search_query or current_status %}
+<div class="row mb-4">
+    <div class="col-md-6 col-lg-5">
+        <div class="card h-100 shadow-sm border-0">
+            <div class="card-header bg-white border-bottom-0 pt-3 pb-0">
+                <h6 class="mb-0 text-muted fw-bold">
+                    <i class="fas fa-chart-pie me-2 text-primary"></i>Статистика по статусам
+                </h6>
+            </div>
+            <div class="card-body position-relative" style="min-height: 200px;">
+                <canvas id="statusChart"></canvas>
+            </div>
+        </div>
+    </div>
+</div>
+{% endif %}
+
+<div class="card mb-4 shadow-sm border-0">
+    <div class="card-body py-3">
+        <form method="get" class="row align-items-center gx-3">
+            <div class="col-auto">
+                <i class="fas fa-search text-muted me-2"></i>
+                <strong class="text-muted">Поиск и фильтры:</strong>
+            </div>
+            
+            <div class="col-md-4 col-sm-12 mb-2 mb-md-0">
+                <input type="text" name="q" class="form-control form-control-sm" placeholder="ID, Товар, Имя инициатора..." value="{{ search_query }}">
+            </div>
+
+            <div class="col-md-3 col-sm-12 mb-2 mb-md-0">
+                <select name="status" class="form-select form-select-sm" onchange="this.form.submit()">
+                    <option value="">Все статусы</option>
+                    {% for value, label in status_choices %}
+                        <option value="{{ value }}" {% if current_status == value %}selected{% endif %}>
+                            {{ label }}
+                        </option>
+                    {% endfor %}
+                </select>
+            </div>
+            
+            <div class="col-auto d-flex gap-2">
+                <button type="submit" class="btn btn-sm btn-primary">Искать</button>
+                <a href="{% url 'request_list' %}" class="btn btn-sm btn-outline-secondary">Сбросить</a>
+                <a href="{% url 'export_requests_excel' %}?status={{ current_status }}&q={{ search_query }}" class="btn btn-sm btn-success">
+                    <i class="fas fa-file-excel me-1"></i> В Excel
+                </a>
+            </div>
+        </form>
+    </div>
+</div>
+
+<div class="card">
+    <div class="card-header">
+        <i class="fas fa-list me-2"></i>
+        Заявки на закупку
+    </div>
+    <div class="card-body p-0">
+        {% if requests %}
+            <div class="table-responsive">
+                <table class="table align-middle">
+                    <thead>
+                        <tr>
+                            <th style="width: 5%;">ID</th>
+                            <th style="width: 25%;">Что заказано</th>
+                            <th style="width: 10%;">Кол-во</th>
+                            <th style="width: 20%;">Статус</th>
+                            <th style="width: 20%;">Дата</th>
+                            <th style="width: 20%; text-align: center;">Действия</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for req in requests %}
+                        <tr>
+                            <td>
+                                <a href="{% url 'request_detail' req.id %}" style="text-decoration: none;">
+                                    <span style="background: var(--primary-light); color: var(--primary); padding: 0.25rem 0.5rem; border-radius: 4px; font-weight: 600; cursor: pointer;">
+                                        #{{ req.id }}
+                                    </span>
+                                </a>
+                            </td>
+                            <td><strong>{{ req.item.name }}</strong></td>
+                            <td>
+                                <span class="badge" style="background: #e3f2fd; color: var(--primary); font-weight: 500;">
+                                    {{ req.quantity }} шт.
+                                </span>
+                            </td>
+                            <td>
+                                {% if req.status == 'created' %}
+                                    <span class="badge bg-secondary"><i class="fas fa-file-alt me-1"></i> {{ req.get_status_display }}</span>
+                                {% elif req.status == 'pending_approval' %}
+                                    <span class="badge" style="background: #fff3cd; color: #856404;"><i class="fas fa-clock me-1"></i> {{ req.get_status_display }}</span>
+                                {% elif req.status == 'in_progress' %}
+                                    <span class="badge bg-info text-white"><i class="fas fa-cog fa-spin me-1"></i> {{ req.get_status_display }}</span>
+                                {% elif req.status == 'awaiting_delivery' %}
+                                    <span class="badge bg-primary"><i class="fas fa-truck me-1"></i> {{ req.get_status_display }}</span>
+                                {% elif req.status == 'completed' %}
+                                    <span class="badge" style="background: #d4edda; color: #155724;"><i class="fas fa-check-circle me-1"></i> {{ req.get_status_display }}</span>
+                                {% elif req.status == 'rejected' %}
+                                    <span class="badge" style="background: #f8d7da; color: #721c24;"><i class="fas fa-times-circle me-1"></i> {{ req.get_status_display }}</span>
+                                {% endif %}
+                            </td>
+                            <td><small class="text-muted">{{ req.created_at|date:"d.m.Y H:i" }}</small></td>
+                            <td>
+                                {% if req.status == 'created' and user == req.initiator %}
+                                    <form action="{% url 'change_status' req.id 'submit_for_approval' %}" method="post" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-primary w-100"><i class="fas fa-paper-plane me-1"></i> Отправить</button>
+                                    </form>
+                                {% elif req.status == 'pending_approval' and user.role == 'manager' %}
+                                    <div class="d-flex gap-2">
+                                        <form action="{% url 'change_status' req.id 'approve_request' %}" method="post" class="m-0 w-50">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-success w-100" title="Одобрить"><i class="fas fa-check"></i></button>
+                                        </form>
+                                        <form action="{% url 'change_status' req.id 'reject_request' %}" method="post" class="m-0 w-50">
+                                            {% csrf_token %}
+                                            <button type="submit" class="btn btn-sm btn-outline-danger w-100" title="Отклонить"><i class="fas fa-times"></i></button>
+                                        </form>
+                                    </div>
+                                {% elif req.status == 'in_progress' and user.role == 'purchaser' %}
+                                    <form action="{% url 'change_status' req.id 'mark_as_ordered' %}" method="post" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-info text-white w-100"><i class="fas fa-truck me-1"></i> Заказать</button>
+                                    </form>
+                                {% elif req.status == 'awaiting_delivery' and user.role == 'purchaser' %}
+                                    <form action="{% url 'change_status' req.id 'complete_request' %}" method="post" class="m-0">
+                                        {% csrf_token %}
+                                        <button type="submit" class="btn btn-sm btn-success w-100"><i class="fas fa-box-open me-1"></i> Выдать</button>
+                                    </form>
+                                {% else %}
+                                    <div class="text-center text-muted small"><i class="fas fa-lock me-1"></i> Нет действий</div>
+                                {% endif %}
+                            </td>
+                        </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+
+            {% if is_paginated %}
+                <div class="card-footer bg-white border-top py-3 d-flex justify-content-center">
+                    <nav aria-label="Навигация по страницам">
+                        <ul class="pagination pagination-sm mb-0">
+                            {% if page_obj.has_previous %}
+                                <li class="page-item"><a class="page-link" href="?page=1{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">&laquo; Первая</a></li>
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.previous_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Назад</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">&laquo; Первая</span></li>
+                                <li class="page-item disabled"><span class="page-link">Назад</span></li>
+                            {% endif %}
+
+                            <li class="page-item active"><span class="page-link">Страница {{ page_obj.number }} из {{ page_obj.paginator.num_pages }}</span></li>
+
+                            {% if page_obj.has_next %}
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.next_page_number }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Вперед</a></li>
+                                <li class="page-item"><a class="page-link" href="?page={{ page_obj.paginator.num_pages }}{% if current_status %}&status={{ current_status }}{% endif %}{% if search_query %}&q={{ search_query }}{% endif %}">Последняя &raquo;</a></li>
+                            {% else %}
+                                <li class="page-item disabled"><span class="page-link">Вперед</span></li>
+                                <li class="page-item disabled"><span class="page-link">Последняя &raquo;</span></li>
+                            {% endif %}
+                        </ul>
+                    </nav>
+                </div>
+            {% endif %}
+        {% else %}
+            <div class="empty-state">
+                <i class="fas fa-search text-muted mb-3" style="font-size: 3rem;"></i>
+                <h5 class="mt-3 mb-2">Ничего не найдено</h5>
+                <p class="mb-4">По вашему запросу нет подходящих заявок. Попробуйте изменить параметры поиска.</p>
+                <a href="{% url 'request_list' %}" class="btn btn-outline-primary">Сбросить фильтры</a>
+            </div>
+        {% endif %}
+    </div>
+</div>
+
+<div class="mt-4 p-3 bg-light rounded" style="border-left: 4px solid var(--primary);">
+    <small class="text-muted">
+        <i class="fas fa-info-circle me-2"></i>
+        Всего заявок: <strong>{% if is_paginated %}{{ paginator.count }}{% else %}{{ requests|length }}{% endif %}</strong>
+    </small>
+</div>
+{% endblock %}
+
+{% block extra_js %}
+<script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/chartjs-plugin-datalabels@2.0.0"></script>
+
+<script>
+document.addEventListener('DOMContentLoaded', function() {
+    Chart.register(ChartDataLabels);
+
+    const labelsStr = '{{ chart_labels|safe }}';
+    const dataStr = '{{ chart_data|safe }}';
+    
+    if (!labelsStr || !dataStr) return;
+
+    const labels = JSON.parse(labelsStr);
+    const data = JSON.parse(dataStr);
+    
+    if (data.length === 0) return;
+
+    const colorMap = {
+        'Создана': '#6c757d',
+        'На согласовании': '#ffc107',
+        'В работе': '#0dcaf0',
+        'Ожидает доставки': '#0d6efd',
+        'Выполнена': '#198754',
+        'Отклонена': '#dc3545'
+    };
+
+    const bgColors = labels.map(label => colorMap[label] || '#ced4da');
+
+    const ctx = document.getElementById('statusChart').getContext('2d');
+    
+    new Chart(ctx, {
+        type: 'doughnut',
+        data: {
+            labels: labels,
+            datasets: [{
+                data: data,
+                backgroundColor: bgColors,
+                borderWidth: 2,
+                borderColor: '#ffffff'
+            }]
+        },
+        options: {
+            responsive: true,
+            maintainAspectRatio: false,
+            plugins: {
+                legend: { 
+                    position: 'right', 
+                    labels: { boxWidth: 12, padding: 15 } 
+                },
+                datalabels: {
+                    color: '#fff',
+                    formatter: (value, ctx) => {
+                        let sum = ctx.chart.data.datasets[0].data.reduce((a, b) => a + b, 0);
+                        let percentage = (value * 100 / sum).toFixed(0) + "%";
+                        return percentage;
+                    },
+                    font: { weight: 'bold', size: 14 }
+                }
+            },
+            cutout: '65%'
+        }
+    });
+});
+</script>
+{% endblock %}
