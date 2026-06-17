@@ -18,27 +18,16 @@ from .forms import PurchaseRequestForm, CustomUserCreationForm
 
 
 # Вспомогательная функция для отправки уведомлений в Telegram
-def send_telegram_notification(msg, request_id=self.object.id, base_url="https://bitps.onrender.com"):
+def send_telegram_notification(message, request_id=None, base_url="https://bitps.onrender.com"):
     token = getattr(settings, 'TELEGRAM_BOT_TOKEN', None)
     chat_id = getattr(settings, 'TELEGRAM_CHAT_ID', None)
     if not token or not chat_id:
         return
-        
     url = f"https://api.telegram.org/bot{token}/sendMessage"
-    payload = {
-        'chat_id': chat_id,
-        'text': message,
-        'parse_mode': 'Markdown'
-    }
-    
-    # Если передан ID заявки, добавляем кнопку для перехода или просмотра
+    payload = {'chat_id': chat_id, 'text': message, 'parse_mode': 'Markdown'}
     if request_id:
-        payload['reply_markup'] = {
-            'inline_keyboard': [[
-                {'text': f"Открыть заявку #{request_id}", 'url': f"http://127.0.0.1:8000/requests/{request_id}/"}
-            ]]
-        }
-    
+        full_link = f"{base_url}/requests/{request_id}/"
+        payload['reply_markup'] = {'inline_keyboard': [[{'text': f"Открыть заявку #{request_id}", 'url': full_link}]]}
     try:
         requests.post(url, json=payload, timeout=5)
     except requests.RequestException:
